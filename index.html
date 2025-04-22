@@ -137,10 +137,15 @@
                     <a href="#pricing">Worksheets</a>
                   </li>
                   <li>
-                    <a href="#submission">Submission</a>
+                    <a href="#services">Submission</a>
                   </li>
                   <li>
-                    <a href="https://drive.google.com/drive/folders/1B5Ema_KnDSTPDlag4c4p5jjhgIBTz6UF?usp=sharing">Materials</a>
+                    <a
+                      href="https://drive.google.com/drive/folders/1B5Ema_KnDSTPDlag4c4p5jjhgIBTz6UF?usp=sharing"
+                      target="_blank"
+                      rel="noopener"
+                      >Materials</a
+                    >
                   </li>
                 </ul>
               </nav>
@@ -359,7 +364,7 @@
             >
               <div class="pricing-block-content">
                 <h3>Banana</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/banana-preview.png"
@@ -384,7 +389,7 @@
             <div class="pricing-block col-3 wow fadeInUp" data-wow-delay="0.5s">
               <div class="pricing-block-content">
                 <h3>Cacao</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/cacao-preview.png"
@@ -409,7 +414,7 @@
             <div class="pricing-block col-3 wow fadeInUp" data-wow-delay="0.6s">
               <div class="pricing-block-content">
                 <h3>Cacao Existing</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/cacao-existing-preview.png"
@@ -434,7 +439,7 @@
             <div class="pricing-block col-3 wow fadeInUp" data-wow-delay="0.7s">
               <div class="pricing-block-content">
                 <h3>Coffee</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/coffee-preview.png"
@@ -459,7 +464,7 @@
             <div class="pricing-block col-3 wow fadeInUp" data-wow-delay="0.8s">
               <div class="pricing-block-content">
                 <h3>Coffee Existing</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/coffee-existing-preview.png"
@@ -483,7 +488,7 @@
             <div class="pricing-block col-3 wow fadeInUp" data-wow-delay="0.5s">
               <div class="pricing-block-content">
                 <h3>Cropping Calendar</h3>
-                <p class="pricing-sub">Samteng instruction?</p>
+                <p class="pricing-sub"></p>
                 <div class="price">
                   <img
                     src="images/thumbnails/cropping-calendar-preview.png"
@@ -512,12 +517,19 @@
             <div class="section-heading">
               <h3>SUBMISSION</h3>
               <h2 class="section-title">Upload Your Files</h2>
-              <p class="section-subtitle">
-                Drag and drop your files below to submit them to the CIS - ACAP
-                Coordination Meeting 2025.
+              <p class="submission-instruction">
+                Please rename your files before uploading using the format:
+                <strong
+                  >municipality/province/city_cropname_recommendations.xlsx</strong
+                >
+                (e.g., davaocity_banana_recommendations.xlsx) for
+                recommendations, or
+                <strong
+                  >municipality/province/city_cropping_calendar.xlsx</strong
+                >
+                (e.g., davaocity_cropping_calendar.xlsx) for cropping calendars.
               </p>
             </div>
-
             <div class="col-1">
               <div
                 id="dropZone"
@@ -529,8 +541,15 @@
                   type="file"
                   id="fileInput"
                   multiple
+                  accept=".xlsx"
                   style="display: none"
                 />
+                <progress
+                  id="uploadProgress"
+                  value="0"
+                  max="100"
+                  style="display: none; margin-top: 10px"
+                ></progress>
               </div>
               <div id="uploadFeedback" class="upload-feedback"></div>
             </div>
@@ -618,12 +637,11 @@
         }
       };
 
-      // Drag-and-Drop Upload Logic
       const dropZone = document.getElementById("dropZone");
       const fileInput = document.getElementById("fileInput");
       const feedback = document.getElementById("uploadFeedback");
       const webAppUrl =
-        "https://script.google.com/macros/s/AKfycbzGHduy90VZE2-JBhAEOal-JqO32KS7nErHyljxHKG3WZquMF8XxLy59iOAq--x9tN5MQ/exec"; // Replace with your Google Apps Script Web App URL
+        "https://script.google.com/macros/s/AKfycbzGHduy90VZE2-JBhAEOal-JqO32KS7nErHyljxHKG3WZquMF8XxLy59iOAq--x9tN5MQ/exec";
 
       dropZone.addEventListener("dragover", (e) => {
         e.preventDefault();
@@ -651,8 +669,15 @@
       });
 
       async function uploadFiles(files) {
+        const allowedTypes = [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ];
         feedback.innerHTML = "";
         for (const file of files) {
+          if (!allowedTypes.includes(file.type)) {
+            feedback.innerHTML += `<p class="error">Error: ${file.name} is not an allowed file type (.xlsx).</p>`;
+            continue;
+          }
           feedback.innerHTML += `<p>Uploading ${file.name}...</p>`;
           try {
             const reader = new FileReader();
@@ -663,20 +688,35 @@
               formData.append("data", base64Data);
               formData.append("filename", file.name);
               formData.append("mimetype", file.type);
-
-              const response = await fetch(webAppUrl, {
-                method: "POST",
-                body: formData,
-              });
-              const result = await response.text();
-              if (result === "Success") {
-                feedback.innerHTML += `<p>${file.name} uploaded successfully!</p>`;
-              } else {
-                feedback.innerHTML += `<p>Error uploading ${file.name}: ${result}</p>`;
+              const progress = document.getElementById("uploadProgress");
+              progress.style.display = "block";
+              progress.value = 50;
+              try {
+                const response = await fetch(webAppUrl, {
+                  method: "POST",
+                  body: formData,
+                });
+                const result = await response.text();
+                progress.value = 100;
+                if (result === "Success") {
+                  feedback.innerHTML += `<p class="success">${file.name} uploaded successfully!</p>`;
+                } else {
+                  console.error("Server error:", result);
+                  feedback.innerHTML += `<p class="error">Error uploading ${file.name}: ${result}</p>`;
+                }
+              } catch (fetchError) {
+                console.error("Fetch error:", fetchError);
+                feedback.innerHTML += `<p class="error">Error uploading ${file.name}: Network or access issue. Please try again.</p>`;
               }
+              progress.style.display = "none";
+              progress.value = 0;
+            };
+            reader.onerror = () => {
+              feedback.innerHTML += `<p class="error">Error reading ${file.name}: File read failed.</p>`;
             };
           } catch (error) {
-            feedback.innerHTML += `<p>Error uploading ${file.name}: ${error.message}</p>`;
+            console.error("Client error:", error);
+            feedback.innerHTML += `<p class="error">Error uploading ${file.name}: ${error.message}</p>`;
           }
         }
       }
