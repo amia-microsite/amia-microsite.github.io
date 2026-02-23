@@ -126,7 +126,10 @@ a:hover, #header.nav-solid nav a:hover {
 #banner {
     background: url("../images/banner-images/banner-image-1.png") no-repeat center top;
     background-size: auto 100%;
+    background-origin: content-box;
+    padding-top: 101px;
     height: 90vh;
+    box-sizing: border-box;
 }
 
 
