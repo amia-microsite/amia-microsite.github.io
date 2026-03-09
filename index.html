@@ -110,7 +110,7 @@
                   <a
                     target="_blank"
                     title="Google Drive"
-                    href="https://drive.google.com/drive/u/1/folders/1zuv5ng48v9zzkvbKNl9dRcaWhPsEyv3F"
+                    href="https://drive.google.com/drive/u/1/folders/1PacIs7yyD_TlzKYZWgYzQN38aNnYUEc3"
                   >
                     <i class="fa-brands fa-google-drive fa-1x"></i
                     ><span>Google Drive</span>
@@ -140,7 +140,7 @@
                 </li>
                 <li>
                   <a
-                    href="https://drive.google.com/drive/u/1/folders/1zuv5ng48v9zzkvbKNl9dRcaWhPsEyv3F"
+                    href="https://drive.google.com/drive/u/1/folders/1PacIs7yyD_TlzKYZWgYzQN38aNnYUEc3"
                     target="_blank"
                     rel="noopener"
                     >Materials</a
@@ -633,7 +633,7 @@
               <a
                 target="_blank"
                 title="Google Drive"
-                href="https://drive.google.com/drive/u/1/folders/1B5Ema_KnDSTPDlag4c4p5jjhgIBTz6UF"
+                href="https://drive.google.com/drive/u/1/folders/1PacIs7yyD_TlzKYZWgYzQN38aNnYUEc3"
               >
                 <i class="fa-brands fa-google-drive fa-1x"></i
                 ><span>Google Drive</span>
@@ -722,17 +722,25 @@
         uploadFiles(files);
       });
 
+      function updateUploadStatus(uploadId, html) {
+        const el = document.getElementById(uploadId);
+        if (el) el.outerHTML = html;
+      }
+
       async function uploadFiles(files) {
         const allowedTypes = [
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ];
         feedback.innerHTML = "";
+        let fileIndex = 0;
         for (const file of files) {
           if (!allowedTypes.includes(file.type)) {
             feedback.innerHTML += `<p class="error">Error: ${file.name} is not an allowed file type (.xlsx).</p>`;
             continue;
           }
-          feedback.innerHTML += `<p>Uploading ${file.name}...</p>`;
+          const uploadId = "upload-" + fileIndex + "-" + Date.now();
+          feedback.innerHTML += `<p id="${uploadId}">Uploading ${file.name}...</p>`;
+          fileIndex++;
           try {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -753,24 +761,24 @@
                 const result = await response.text();
                 progress.value = 100;
                 if (result === "Success") {
-                  feedback.innerHTML += `<p class="success">${file.name} uploaded successfully!</p>`;
+                  updateUploadStatus(uploadId, `<p class="success">${file.name} uploaded successfully!</p>`);
                 } else {
                   console.error("Server error:", result);
-                  feedback.innerHTML += `<p class="error">Error uploading ${file.name}: ${result}</p>`;
+                  updateUploadStatus(uploadId, `<p class="error">Error uploading ${file.name}: ${result}</p>`);
                 }
               } catch (fetchError) {
                 console.error("Fetch error:", fetchError);
-                feedback.innerHTML += `<p class="error">Error uploading ${file.name}: Network or access issue. Please try again.</p>`;
+                updateUploadStatus(uploadId, `<p class="error">Error uploading ${file.name}: Network or access issue. Please try again.</p>`);
               }
               progress.style.display = "none";
               progress.value = 0;
             };
             reader.onerror = () => {
-              feedback.innerHTML += `<p class="error">Error reading ${file.name}: File read failed.</p>`;
+              updateUploadStatus(uploadId, `<p class="error">Error reading ${file.name}: File read failed.</p>`);
             };
           } catch (error) {
             console.error("Client error:", error);
-            feedback.innerHTML += `<p class="error">Error uploading ${file.name}: ${error.message}</p>`;
+            updateUploadStatus(uploadId, `<p class="error">Error uploading ${file.name}: ${error.message}</p>`);
           }
         }
       }
