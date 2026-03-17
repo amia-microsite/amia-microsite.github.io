@@ -2469,3 +2469,60 @@ blockquote {
     background-color: #007bff;
     border-radius: 5px;
 }
+
+/* ====================== HORIZONTAL SCROLL WITH PEEK EFFECT ====================== */
+.updates-scroller-wrapper {
+    max-width: 1245px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.updates-scroller {
+    display: flex;
+    gap: 40px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 40px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    
+    /* This creates the "peek" effect - shows part of the next update */
+    padding-right: 80px;           /* Adjust this value to control how much peeks */
+}
+
+/* Each update block */
+.update-block {
+    min-width: 100%;
+    flex-shrink: 0;
+}
+
+/* Visible horizontal scrollbar only */
+.updates-scroller::-webkit-scrollbar {
+    height: 10px;
+}
+
+.updates-scroller::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+.updates-scroller::-webkit-scrollbar-thumb {
+    background: #f39822;
+    border-radius: 10px;
+}
+
+.updates-scroller::-webkit-scrollbar-thumb:hover {
+    background: #e07e0c;
+}
+
+/* On very large screens, show both fully */
+@media (min-width: 1600px) {
+    .updates-scroller {
+        padding-right: 0;
+        overflow-x: visible;
+        gap: 60px;
+    }
+    .update-block {
+        min-width: calc(50% - 30px);
+    }
+}
